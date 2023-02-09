@@ -47,21 +47,20 @@ function SignUp({navigation}:SignUpScreenProps){
       }
       try{
         setLoading(true);
-        console.log("CONF",Config);
         console.log("config",Config.API_URL);
         const res=await axios.post(`${Config.API_URL}/user`,{email,name,pwd}); // pwd는 해시화, 일방향 함호화
         console.log("data",res.data)
       }catch(err:unknown){
         const errorResponse=(err as AxiosError).response
         if(errorResponse){
-          // Alert.alert('알림',errorResponse.data.message)
+          Alert.alert('알림',errorResponse.data.message)
         }
       }finally{
-        console.log("success")
         setLoading(false)
       }
         Alert.alert("알림",'회원가입이 완료되었습니다');
-    },[email,pwd,name]);
+        navigation.navigate('SignIn')
+    },[email,pwd,name,navigation]);
 
 
     const onChangeEmail=useCallback((text)=>{
