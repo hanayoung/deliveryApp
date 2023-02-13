@@ -1,15 +1,21 @@
 import { NavigationProp, useNavigation } from "@react-navigation/native";
 import axios, { AxiosError } from "axios";
 import React, { useCallback, useState } from "react";
-import { Alert, Pressable, StyleSheet, Text, View } from "react-native";
+import { Alert, Dimensions, Pressable, StyleSheet, Text, View } from "react-native";
 import Config from "react-native-config";
+import NaverMapView, { Marker, Path } from "react-native-nmap";
 import { useSelector } from "react-redux";
 import { LoggedInParamList } from "../../AppInner";
 import order, { Order } from "../slices/order";
 import { useAppDispatch } from "../store";
 import { RootState } from "../store/reducer";
+import getDistanceFromLatLonInKm from '../util';
 
-function EachOrder({item}:{item:Order}){
+interface Props {
+    item: Order;
+  }
+
+function EachOrder({item}:Props){
     const dispatch=useAppDispatch();
     const navigation=useNavigation<NavigationProp<LoggedInParamList>>(); //hook을 사용하면 props drilling을 하지 않아도 되지만 타입 추론이 어려워서 다음과 같이 타입을 알려줘야함
     const [detail,setDetail]=useState(false);
@@ -50,25 +56,73 @@ function EachOrder({item}:{item:Order}){
         dispatch(order.actions.rejectOrder(item.orderId))
     },[dispatch,item.orderId]);
 
+    const {start, end} = item;
+
     return(
+    <View style={styles.orderContainer}>
+      <Pressable onPress={toggleDetail} style={styles.info}>
+        <Text style={styles.eachInfo}>
+          {item.price.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',')}원
+        </Text>
+        <Text style={styles.eachInfo}>
+          {getDistanceFromLatLonInKm(
+            start.latitude,
+            start.longitude,
+            end.latitude,
+            end.longitude,
+          ).toFixed(1)}
+          km
+        </Text>
+      </Pressable>
+      {detail && (
         <View>
-            <Pressable onPress={toggleDetail}>
-                <Text>
-                    {item.price.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',')}원
-                </Text>
+          <View
+            style={{
+              width: Dimensions.get('window').width - 30,
+              height: 200,
+              marginTop: 10,
+            }}>
+            <NaverMapView
+              style={{width: '100%', height: '100%'}}
+              zoomControl={false}
+              center={{
+                zoom: 10,
+                tilt: 50,
+                latitude: (start.latitude + end.latitude) / 2,
+                longitude: (start.longitude + end.longitude) / 2,
+              }}>
+              <Marker
+                coordinate={{
+                  latitude: start.latitude,
+                  longitude: start.longitude,
+                }}
+                pinColor="blue"
+              />
+              <Path
+                coordinates={[
+                  {
+                    latitude: start.latitude,
+                    longitude: start.longitude,
+                  },
+                  {latitude: end.latitude, longitude: end.longitude},
+                ]}
+              />
+              <Marker
+                coordinate={{latitude: end.latitude, longitude: end.longitude}}
+              />
+            </NaverMapView>
+          </View>
+          <View style={styles.buttonWrapper}>
+            <Pressable onPress={onAccept} style={styles.acceptButton}>
+              <Text style={styles.buttonText}>수락</Text>
             </Pressable>
-        {detail?(
-            <View>
-                <Text>상세부문</Text>
-                    <Pressable onPress={onAccept} disabled={loading}>
-                        <Text>수락</Text>
-                    </Pressable>
-                    <Pressable onPress={onReject}>
-                        <Text>거절</Text>
-                    </Pressable>
-                </View>
-        ):null}
+            <Pressable onPress={onReject} style={styles.rejectButton}>
+              <Text style={styles.buttonText}>거절</Text>
+            </Pressable>
+          </View>
         </View>
+      )}
+    </View>
         )
 }
 

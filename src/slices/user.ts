@@ -18,6 +18,7 @@ const user = createSlice({
       // 토큰 연장 하려고 할 때, 서버에 refreshToken을 보냄, 대개 유효기간이 더 김
       //action.payload.email 이므로 사용할 때는 객체이므로 email:res.data.data.email이지만, 
       //action.payload인 경우는 값(res.data.data.email)만 보내주면 됨
+      console.log("email",state.email,action.payload.email);
     },
     setEmail(state,action){
       state.email=action.payload;

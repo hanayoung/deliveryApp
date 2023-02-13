@@ -73,42 +73,42 @@ function AppInner() {
       ) //axios.interceptors.request.use() 를 활용하여 axios에서 accessToken 넣어주는 것도 가능함
     },[])
     // 앱 실행 시 토큰 있으면 로그인하는 코드
-  useEffect(() => {
-    const getTokenAndRefresh = async () => {
-      try {
-        const token = await EncryptedStorage.getItem('refreshToken');
-        if (!token) {
-          return;
-        }
-        const response = await axios.post(
-          `${Config.API_URL}/refreshToken`,
-          {},
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          },
-        );
-        dispatch(
-          userSlice.actions.setUser({
-            name: response.data.data.name,
-            email: response.data.data.email,
-            accessToken: response.data.data.accessToken,
-          }),
-        );
-      } catch (err:unknown) {
-        console.error(err);
-        const errorResponse=(err as AxiosError).response
-        if (errorResponse?.data.code === 'expired') {
-          Alert.alert('알림', '다시 로그인 해주세요.');
-        }
-      }
-      finally{
-        //TODO :스플래쉬스크린
-      }
-    };
-    getTokenAndRefresh();
-  }, [dispatch]);
+  // useEffect(() => {
+  //   const getTokenAndRefresh = async () => {
+  //     try {
+  //       const token = await EncryptedStorage.getItem('refreshToken');
+  //       if (!token) {
+  //         return;
+  //       }
+  //       const response = await axios.post(
+  //         `${Config.API_URL}/refreshToken`,
+  //         {},
+  //         {
+  //           headers: {
+  //             Authorization: `Bearer ${token}`,
+  //           },
+  //         },
+  //       );
+  //       dispatch(
+  //         userSlice.actions.setUser({
+  //           name: response.data.data.name,
+  //           email: response.data.data.email,
+  //           accessToken: response.data.data.accessToken,
+  //         }),
+  //       );
+  //     } catch (err:unknown) {
+  //       console.error(err);
+  //       const errorResponse=(err as AxiosError).response
+  //       if (errorResponse?.data.code === 'expired') {
+  //         Alert.alert('알림', '다시 로그인 해주세요.');
+  //       }
+  //     }
+  //     finally{
+  //       //TODO :스플래쉬스크린
+  //     }
+  //   };
+  //   getTokenAndRefresh();
+  // }, [dispatch]);
 
   //dispatch는 불변적인 값으로 넣으나 안 넣으나 똑같은 결과로 빈 배열과 동일한 효과이나, eslint때문에 넣음
 

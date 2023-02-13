@@ -7,8 +7,8 @@ export interface Order{
         longitude:number;
     };
     end:{
+        longitude:number;
         latitude:number;
-        longitutde:number;
     };
     price:number;
 }
